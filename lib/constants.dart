@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const String apiKey = "Your key";
+const String apiKey = "AIzaSyAwEFQ6kwi-sjtVjYPXjP3ATiDrsXbLeVM";
 
 const Color primaryColor = Color(0xFF006491);
 const Color textColorLightTheme = Color(0xFF0D0D0E);

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:places_auto_sugestion/components/network_utility.dart';
+import 'package:places_auto_sugestion/models/autocomplate_prediction.dart';
+import 'package:places_auto_sugestion/models/place_auto_complate_response.dart';
 import 'components/location_list_tile.dart';
 import 'constants.dart';
 
@@ -11,6 +14,28 @@ class SearchLocationScreen extends StatefulWidget {
 }
 
 class _SearchLocationScreenState extends State<SearchLocationScreen> {
+  List<AutocompletePrediction> placePredections = [];
+
+  void placeAutoComplate(String query) async {
+    Uri uri =
+        Uri.https("maps.googleapis.com", "/maps/api/place/autocomplete/json", {
+      "input": query,
+      "key": apiKey,
+    });
+
+    String? response = await NetworkUtility.fetchUrl(uri);
+
+    if (response != null) {
+      PlaceAutocompleteResponse result =
+          PlaceAutocompleteResponse.parseAutocompleteResult(response);
+      if (result.predictions != null) {
+        setState(() {
+          placePredections = result.predictions!;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +73,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
             child: Padding(
               padding: const EdgeInsets.all(defaultPadding),
               child: TextFormField(
-                onChanged: (value) {},
+                onChanged: (value) {
+                  placeAutoComplate(value);
+                },
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: "Search your location",
@@ -93,10 +120,15 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
             thickness: 4,
             color: secondaryColor5LightTheme,
           ),
-          LocationListTile(
-            press: () {},
-            location: "Banasree, Dhaka, Bangladesh",
-          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: placePredections.length,
+              itemBuilder: (context, index) => LocationListTile(
+                press: () {},
+                location: placePredections[index].description!,
+              ),
+            ),
+          )
         ],
       ),
     );
